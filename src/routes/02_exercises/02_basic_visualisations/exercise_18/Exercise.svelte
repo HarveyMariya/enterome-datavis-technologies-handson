@@ -1,5 +1,5 @@
 <script>
-    import {scalelog} from 'd3-scale'
+    import {scaleLog} from 'd3-scale'
     import {axisBottom} from 'd3-axis'
     import {select} from 'd3-selection'
 
