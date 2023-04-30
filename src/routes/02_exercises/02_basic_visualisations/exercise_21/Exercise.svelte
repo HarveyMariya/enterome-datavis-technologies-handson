@@ -1,18 +1,16 @@
 <script>
-    import { onMount } from 'svelte';
-    import { json } from 'd3-fetch';
-    import Scatterplot from '../exercise_21/Scatterplot.svelte';
-   
-    let data = null;
-    
+    import { onMount } from "svelte";
+    import Scatterplot from "./Scatterplot.svelte";
+    let data;
+    let countriesFor1800;
     onMount(async () => {
-        data = await json('/data/gapminder.json');
-    });
-    </script>
-    
-    {#if data == null}
-    <p>The data is being loaded!</p>
-    {:else}
-    <Scatterplot data={data[0].countries}/>
-    {/if}
-      
+    const response = await fetch("/data/gapminder.json");
+    data = await response.json();
+    countriesFor1800 = data.find((entry) => entry.year === '1800').countries;
+  });
+  </script>
+  {#if !countriesFor1800}
+    <p>Lo</p>
+  {:else}
+    <Scatterplot {countriesFor1800} />
+  {/if}

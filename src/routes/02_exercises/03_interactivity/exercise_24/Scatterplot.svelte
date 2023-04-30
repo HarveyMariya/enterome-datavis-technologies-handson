@@ -33,7 +33,9 @@
 <svg viewBox="0 0 {width} {height}" style="max-width: {width}px">
   <g transform="translate({margin.left}, {margin.top})">
     <!-- Scatterplot -->
-    {#each data.filter((d) => d.income && d.life_exp) as element}
+    <!-- {#each data.filter((d) => d.income && d.life_exp) as element} -->
+    {#each data as element}
+      {#if !(element.income === null || element.life_exp === null)}
       <circle
         class="dot"
         cx={xScale(+element.income)}
@@ -43,6 +45,7 @@
       >
         <title>{element.country}</title>
       </circle>
+      {/if}
     {/each}
     <!-- Axes -->
     <g use:xAxis transform="translate(0, {innerHeight})">

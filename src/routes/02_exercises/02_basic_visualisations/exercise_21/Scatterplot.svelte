@@ -1,84 +1,46 @@
 <script>
-  import { scaleLinear, scaleLog, scaleOrdinal } from 'd3-scale';
-  import { schemeTableau10 } from 'd3-scale-chromatic';
-  import { axisBottom, axisLeft } from 'd3-axis';
-  import { max, min } from 'd3-array';
-  import { select } from 'd3-selection';
-
-  export let data
-
-    // Dimensions
-    const [height, width] = [400, 600];
-    const margin = { top: 50, right: 5, bottom: 55, left: 50 };
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
-
-    const scaleX = scaleLog()
-      .domain([300, 150000])
-      .range([0, innerWidth]);
-    const scaleY = scaleLinear()
-      .domain([0, 90])
-      .range([innerHeight, 0]);
-    const scaleColor = scaleOrdinal()
-      .domain(['europe', 'asia', 'america', 'africa'])
-      .range(schemeTableau10);
-    const scaleRadius = scaleLinear()
-      .domain([min(data.map(item => item.population)), max(data.map(item => item.population))])
-      .range([5, 13])
-    
-    const xAxis = (node) => {
-      const xAxisFn = axisBottom(scaleX)
-        .tickValues([400, 4000, 40000])
-        .tickFormat(value => '$${value');
-      xAxisFn(select(node));
-    };
-    const yAxis = (node) => {
-      const yAxisFn = axisLeft(scaleY);
-      yAxisFn(select(node));
-    }
+  import {scaleLinear as sl,scaleSqrt as ss,scaleOrdinal as so} from "d3-scale";
+  import {axisBottom as ab,axisLeft as al} from "d3-axis";
+  import {select as s} from "d3-selection";
+  import {schemeCategory10 as sc10} from "d3-scale-chromatic";
+  import {onMount as om} from "svelte";
+  import {max} from "d3-array";
+  export let countriesFor1800;
+  const [h,w]=[400,600];
+  const m={t:50,r:5,b:55,l:50};
+  const iW=w-m.l-m.r;
+  const iH=h-m.t-m.b;
+  const xS=sl().domain([0,max(countriesFor1800,(d)=>+d.income)]).range([0,iW]);
+  const yS=sl().domain([0,max(countriesFor1800,(d)=>+d.life_exp)]).range([iH,0]);
+  const rS=ss().domain([0,max(countriesFor1800,(d)=>+d.population)]).range([0,25]);
+  const cS=so(sc10).domain([...new Set(countriesFor1800.map((d)=>d.continent))]);
+  const xA=ab(xS);
+  const yA=al(yS);
+  const t="Gapminder Visualization (1800)";
+  const xAL="Income";
+  const yAL="Life Expectancy";
+  const yL="1800";
+  om(()=>{
+    const xAG=s("#x-axis").call(xA);
+    const yAG=s("#y-axis").call(yA);
+  });
   </script>
-  
-  <svg viewBox="0 0 {width} {height}" style="max-width: {width}px">
-    <g transform="translate({margin.left}, {margin.top})">
-      {#each data as item}
-        {#if !(item.income == null || item.life_exp == null)}
-          <circle class = "dot" cx = {scaleX(item.income)} cy = {scaleY(item.life_exp)} r = {scaleRadius(item.population)} fill = {scaleColor(item.continent)}>
-            <title>{item.country}</title>
-          </circle>
-        {/if}
+  <svg viewBox="0 0 {w} {h}" style="max-width: {w}px">
+    <g transform="translate({m.l}, {m.t})">
+      <g id="x-axis" transform="translate(0, {iH})"></g>
+      <g id="y-axis"></g>
+      {#each countriesFor1800 as d}
+        <circle
+          cx="{xS(+d.income)}"
+          cy="{yS(+d.life_exp)}"
+          r="{rS(+d.population)}"
+          fill="{cS(d.continent)}"
+          opacity="0.8"
+        ></circle>
       {/each}
-      <g use:xAxis transform = "translate(0, {innerHeight})">
-        <text x = {(innerWidth / 2)} y = {37} class = "label">GDP per Capital</text>
-      </g>
-      <g use:yAxis transform = "translate(0, {innerHeight})">
-        <text x = {-(innerHeight / 2)} y = {-32} class = "label ylabel">Life Expectancy</text>
-      </g>
-      <text class = "year" x = {innerWidth} y = {innerHeight - 10}>1800</text>
-      <text class = "main" x = {innerWidth / 2} y = {0}> Gapminder Scatterplot</text> 
+      <text x="{iW/2}" y="{iH+m.b/2}" text-anchor="middle" font-size="14">{xAL}</text>
+      <text x="{-iH/2}" y="{-m.l/2}" text-anchor="middle" font-size="14" transform="rotate(-90)">{yAL}</text>
+      <text x="{iW/2}" y="{-m.t/2}" text-anchor="middle" font-size="18" font-weight="bold">{t}</text>
+      <text x="{iW-m.r}" y="{iH-m.b/2}" text-anchor="end" font-size="14">{yL}</text>
     </g>
   </svg>
-
-  <style>
-    .label {
-      font-size: 1.75em;
-      fill: currentColor;
-      text-anchor: middle;
-      vertical-align: bottom;
-    }
-    .ylabel {
-      transform: rotate(-90deg);
-    }
-    .dot {
-      opacity: 0.8;
-    }
-    .year {
-      font-size: 2.25em;
-      opacity: 0.4;
-      text-anchor: end;
-    }
-    .main {
-      font-size: 2.25em;
-      text-anchor: middle;
-    }
-  </style>
-  

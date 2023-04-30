@@ -14,17 +14,41 @@
       innerWidth / 2 + 30,
       innerWidth / 2 + 60
     ];
+
+    const rPoints = 10;
+    const yPoints = innerHeight / 2;
   
     // All lights with a higher index are on!
     let index = points.length;
   
     // Color
     let color = "darkred";
+
+    const interval = setInterval(() => {
+      index -= 1;
+    }, 1000)
+
+    function handleInterval(id) {
+      if (id < 0) {
+        clearInterval(interval);
+        color = "darkgreen";
+      }
+    }
+
+    $: handleInterval(index);
   </script>
   
   <svg viewBox="0 0 {width} {height}">
     <g transform="translate({margin.left},{margin.top})">
-      <!--  -->
+      {#each points as point, i}
+        <circle
+          cx = {point}
+          cy = {yPoints}
+          r = {rPoints}
+          fill = {color}
+          opacity = {i >= index ? 1 : 0.3}>
+        </circle>
+      {/each}
     </g>
   </svg>
   
